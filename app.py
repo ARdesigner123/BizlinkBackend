@@ -36,7 +36,7 @@ def get_container_data(container_id):
         return jsonify({"error": "Server is missing Supabase keys. Please add them in Render."}), 500
 
     try:
-        response = supabase.table('data').select('*').eq('container_id', container_id).execute()
+        response = supabase.table('materials').select('*').eq('container_id', container_id).execute()
         return jsonify(response.data), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
