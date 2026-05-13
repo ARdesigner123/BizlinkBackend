@@ -1,5 +1,6 @@
 import os
 import sys
+from datetime import datetime, timezone # <-- NEW: We need this to get the current time
 
 # Wrap the imports in a try-catch so we know if a library is failing to load
 try:
@@ -36,8 +37,19 @@ def get_container_data(container_id):
         return jsonify({"error": "Server is missing Supabase keys. Please add them in Render."}), 500
 
     try:
-        response = supabase.table('materials').select('*').eq('container_id', container_id).execute()
+        # 1. Get the exact time right now (in UTC timezone)
+        current_time = datetime.now(timezone.utc).isoformat()
+
+        # 2. Update the database! We set issuance_time to 'current_time'
+        # Supabase automatically returns the newly updated rows after it saves them!
+        response = supabase.table('materials') \
+            .update({'issuance_time': current_time}) \
+            .eq('container_id', container_id) \
+            .execute()
+
+        # 3. Send the freshly updated data back to the frontend
         return jsonify(response.data), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
